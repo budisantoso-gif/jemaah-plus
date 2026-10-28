@@ -1,10 +1,8 @@
-// Service worker JEMAAH+
-// Strategi: cache-first. Setelah kunjungan pertama, semua file inti
-// disimpan di HP dan dipakai langsung tanpa perlu internet lagi.
-// Ketika ada versi baru, naikkan CACHE_NAME supaya cache lama dibuang
-// dan file baru diunduh ulang.
-
-var CACHE_NAME = 'jemaah-plus-v2';
+// JEMAAH+ service worker v3
+// Strategi: network-first dengan batas waktu 3 detik, lalu cadangan dari cache.
+// Online  -> selalu ambil versi terbaru (dan simpan ke cache).
+// Offline -> pakai versi tersimpan, sehingga aplikasi tetap jalan di dalam masjid / tanpa sinyal.
+var CACHE_NAME = 'jemaah-plus-v3';
 var FILES_TO_CACHE = [
   './',
   './index.html',
@@ -18,37 +16,47 @@ self.addEventListener('install', function(event){
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache){
       return cache.addAll(FILES_TO_CACHE);
-    })
+    }).then(function(){ return self.skipWaiting(); })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', function(event){
   event.waitUntil(
-    caches.keys().then(function(keys){
-      return Promise.all(
-        keys.filter(function(key){ return key !== CACHE_NAME; })
-            .map(function(key){ return caches.delete(key); })
-      );
-    })
+    caches.keys().then(function(names){
+      return Promise.all(names.filter(function(n){ return n !== CACHE_NAME; })
+        .map(function(n){ return caches.delete(n); }));
+    }).then(function(){ return self.clients.claim(); })
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', function(event){
-  event.respondWith(
-    caches.match(event.request).then(function(cached){
-      if(cached){ return cached; }
-      return fetch(event.request).then(function(response){
-        // Simpan salinan baru ke cache untuk dipakai offline nanti
-        return caches.open(CACHE_NAME).then(function(cache){
-          cache.put(event.request, response.clone());
-          return response;
-        });
-      }).catch(function(){
-        // Kalau offline dan file belum pernah di-cache, tampilkan halaman utama sebagai fallback
-        return caches.match('./index.html');
+function networkFirst(request){
+  return new Promise(function(resolve){
+    var selesai = false;
+    var timer = setTimeout(function(){
+      caches.match(request).then(function(hit){
+        if(hit && !selesai){ selesai = true; resolve(hit); }
       });
-    })
-  );
+    }, 3000);
+    fetch(request).then(function(resp){
+      clearTimeout(timer);
+      if(resp && resp.ok){
+        var salinan = resp.clone();
+        caches.open(CACHE_NAME).then(function(c){ c.put(request, salinan); });
+      }
+      if(!selesai){ selesai = true; resolve(resp); }
+    }).catch(function(){
+      clearTimeout(timer);
+      if(selesai) return;
+      caches.match(request).then(function(hit){
+        selesai = true;
+        resolve(hit || caches.match('./index.html'));
+      });
+    });
+  });
+}
+
+self.addEventListener('fetch', function(event){
+  if(event.request.method !== 'GET') return;
+  if(new URL(event.request.url).origin !== self.location.origin) return;
+  event.respondWith(networkFirst(event.request));
 });

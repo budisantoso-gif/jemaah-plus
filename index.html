@@ -41,16 +41,8 @@
     top:0;
     z-index:10;
   }
-  header h1{
-    margin:0;
-    font-size:22px;
-    font-weight:700;
-  }
-  header p{
-    margin:4px 0 0;
-    font-size:14px;
-    color:#cfe6dc;
-  }
+  header h1{margin:0;font-size:22px;font-weight:700;}
+  header p{margin:4px 0 0;font-size:14px;color:#cfe6dc;}
   .beta-tag{
     display:inline-block;
     background:#fff;
@@ -88,9 +80,7 @@
     color:var(--hijau-tua);
     border:2px solid var(--hijau);
   }
-  .btn-besar.darurat{
-    background:var(--merah);
-  }
+  .btn-besar.darurat{background:var(--merah);}
   .btn-besar:active{opacity:0.85;}
 
   .kartu{
@@ -139,16 +129,22 @@
     border:none;
     padding:8px 2px;
     font-size:12px;
+    line-height:1.2;
     color:var(--teks-lembut);
     font-weight:600;
   }
-  .nav-item .ikon{font-size:22px;display:block;margin-bottom:2px;}
+  .nav-item .ikon{
+    font-size:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:28px;
+    line-height:1;
+    margin-bottom:2px;
+  }
   .nav-item.aktif{color:var(--hijau-tua);}
 
-  .back-row{
-    display:flex;align-items:center;gap:10px;
-    margin-bottom:16px;
-  }
+  .back-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
   .back-btn{
     background:var(--putih);
     border:2px solid var(--garis);
@@ -176,10 +172,7 @@
     color:var(--teks-lembut);
     margin-top:20px;
   }
-  .langkah{
-    display:flex;gap:12px;margin-bottom:16px;
-    align-items:flex-start;
-  }
+  .langkah{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start;}
   .langkah .nomor{
     background:var(--hijau);color:#fff;
     width:32px;height:32px;border-radius:50%;
@@ -193,6 +186,43 @@
     border-radius:12px;padding:16px 10px;
     text-align:center;font-weight:700;font-size:17px;
   }
+
+  .petunjuk{font-size:15px;color:var(--teks-lembut);margin:4px 2px 14px;}
+  .zona-judul{
+    display:flex;align-items:center;gap:10px;
+    margin:18px 0 8px;
+  }
+  .zona-judul .swatch{
+    width:22px;height:22px;border-radius:6px;
+    border:1px solid #8fbfa9;flex-shrink:0;
+  }
+  .zona-judul b{font-size:17px;}
+  .zona-judul span.info{display:block;font-size:14px;color:var(--teks-lembut);}
+  .baris-hotel{
+    display:flex;align-items:center;gap:12px;
+    width:100%;
+    min-height:56px;
+    background:#fff;
+    border:1px solid var(--garis);
+    border-radius:12px;
+    margin-bottom:8px;
+    padding:8px 12px;
+    text-align:left;
+    font-size:17px;
+    color:var(--teks);
+  }
+  .baris-hotel .no{
+    min-width:34px;height:34px;border-radius:17px;
+    background:#fff;border:2px solid var(--hijau);
+    color:var(--hijau-tua);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:15px;flex-shrink:0;
+  }
+  .baris-hotel .nm{flex:1;line-height:1.25;}
+  .baris-hotel .nm small{display:block;font-size:13px;color:var(--emas);font-weight:700;}
+  .baris-hotel .wk{font-size:14px;color:var(--teks-lembut);white-space:nowrap;}
+  .baris-hotel.terpilih{background:var(--emas-muda);border:2px solid var(--emas);}
+  .baris-hotel.terpilih .no{background:var(--emas);border-color:#7a5512;color:#fff;}
 </style>
 </head>
 <body>
@@ -219,22 +249,23 @@
       <span class="ikon">&#127968;</span> Jabal Omar / Ash Shubaikah
     </button>
     <button class="btn-besar sekunder" onclick="showScreen('tersesat')">
-      <span class="ikon">&#9888;</span> Saya tersesat
+      <span class="ikon">&#9888;&#65039;</span> Saya tersesat
     </button>
     <button class="btn-besar sekunder" onclick="showScreen('tentang')">
-      <span class="ikon">&#8505;</span> Tentang aplikasi ini
+      <span class="ikon">&#8505;&#65039;</span> Tentang aplikasi ini
     </button>
   </section>
 
   <!-- PETA AREA -->
   <section class="screen" id="peta">
     <div class="back-row">
-      <button class="back-btn" onclick="showScreen('home')">&#8592;</button>
+      <button class="back-btn" onclick="petaKembali()">&#8592;</button>
       <h2 id="peta-judul-kawasan">Peta area</h2>
     </div>
-    <div class="kartu" style="padding:12px;" id="peta-svg-wrap">
-    </div>
-    <div class="peringatan">Diagram ini skematis, bukan peta presisi. Posisi dan jarak disederhanakan untuk membantu orientasi umum, bukan untuk navigasi turn-by-turn.</div>
+    <div class="kartu" style="padding:8px;" id="peta-svg-wrap"></div>
+    <p class="petunjuk">Ketuk nomor di peta untuk menandai hotelnya di daftar. Ketuk nama hotel untuk membuka detail.</p>
+    <div id="peta-legenda"></div>
+    <div class="peringatan">Peta ini skematis, bukan peta presisi. Jarak dan arah disederhanakan, dan kipas digambar ke bawah agar muat di layar. Arah sebenarnya tertulis di pojok kanan atas peta. Posisi titik di dalam satu cincin tidak menunjukkan letak hotel yang sebenarnya.</div>
   </section>
 
   <!-- CARI HOTEL -->
@@ -244,6 +275,9 @@
       <h2 id="cari-judul-kawasan">Cari hotel</h2>
     </div>
     <input type="text" id="kotak-cari" placeholder="Ketik nama hotel" oninput="filterHotel()">
+    <button class="btn-besar sekunder" onclick="currentHotelIdx=null;showScreen('peta')">
+      <span class="ikon">&#128506;&#65039;</span> Lihat peta kawasan
+    </button>
     <div id="daftar-hotel"></div>
   </section>
 
@@ -260,10 +294,13 @@
       <span class="label-status status-estimasi" id="detail-status">ESTIMASI, BELUM DIVERIFIKASI</span>
     </div>
     <button class="btn-besar" onclick="showScreen('keharam')">
-      <span class="ikon">&#128737;</span> Ke Masjidil Haram
+      <span class="ikon">&#128737;&#65039;</span> Ke Masjidil Haram
     </button>
     <button class="btn-besar sekunder" onclick="showScreen('pulang')">
       <span class="ikon">&#127968;</span> Kembali ke hotel
+    </button>
+    <button class="btn-besar sekunder" onclick="showScreen('peta')">
+      <span class="ikon">&#128506;&#65039;</span> Lihat hotel ini di peta
     </button>
   </section>
 
@@ -282,7 +319,7 @@
     <div class="langkah"><div class="nomor">2</div><p>Ikuti arah menuju gate, ikuti kerumunan jamaah yang searah tujuan yang sama.</p></div>
     <div class="langkah"><div class="nomor">3</div><p>Perhatikan papan nama gate untuk memastikan Anda menuju gate yang benar.</p></div>
     <button class="btn-besar sekunder" onclick="showScreen('peta')">
-      <span class="ikon">&#128506;</span> Lihat peta area
+      <span class="ikon">&#128506;&#65039;</span> Lihat peta area
     </button>
     <div class="peringatan">Estimasi waktu jalan bisa berubah tergantung kepadatan jamaah dan kondisi Anda. Langkah di atas adalah panduan umum, bukan instruksi jalan yang presisi — perhatikan petunjuk petugas di lapangan.</div>
   </section>
@@ -298,7 +335,6 @@
       <p>Setelah keluar dari gate acuan, cari kembali arah kawasan hotel Anda. Ingat ciri hotel Anda (warna gedung, nama depan) untuk memudahkan pencarian saat ramai.</p>
     </div>
     <div class="peringatan">Jika bingung arah pulang, gunakan tombol "Saya tersesat" dari menu utama.</div>
-
   </section>
 
   <!-- SAYA TERSESAT -->
@@ -344,6 +380,10 @@
       <p>JEMAAH+ adalah panduan orientasi untuk membantu jamaah memahami kawasan, gate, hotel, dan arah kembali di sekitar Masjidil Haram.</p>
       <p style="color:var(--teks-lembut);">Gratis, tanpa iklan, tanpa akun, dan bekerja tanpa koneksi internet.</p>
     </div>
+    <div class="kartu">
+      <p class="sub">Versi</p>
+      <p style="margin:0;" id="tentang-versi"></p>
+    </div>
     <div class="catatan-disclaimer">
       <strong>Catatan penting:</strong> Informasi lapangan dapat berubah. Gunakan sebagai referensi awal dan ikuti petunjuk petugas resmi, travel leader, serta kondisi aktual di lokasi. Data pada versi demo ini adalah contoh dan belum diverifikasi langsung di lapangan.
     </div>
@@ -358,169 +398,308 @@
   <button class="nav-item" onclick="showScreen('cari')" id="nav-cari">
     <span class="ikon">&#128269;</span>Cari
   </button>
-  <button class="nav-item" onclick="showScreen('peta')" id="nav-peta">
-    <span class="ikon">&#128506;</span>Peta
+  <button class="nav-item" onclick="currentHotelIdx=null;showScreen('peta')" id="nav-peta">
+    <span class="ikon">&#128506;&#65039;</span>Peta
   </button>
   <button class="nav-item" onclick="showScreen('tersesat')" id="nav-tersesat">
-    <span class="ikon">&#9888;</span>Tersesat
+    <span class="ikon">&#9888;&#65039;</span>Tersesat
   </button>
 </nav>
 
 <script>
-// Dataset per kawasan, sesuai infografis. Semua data ESTIMASI, BELUM diverifikasi lapangan.
-// Struktur ini dibuat supaya mudah menambah kawasan baru tanpa mengubah kode lain.
+//#CORE-START
+// ===== DATA APLIKASI =====
+// Semua data berasal dari infografis TDA (8 September 2026) dan berstatus ESTIMASI,
+// belum diverifikasi lapangan. Catatan kualitas data yang perlu dicek Data Curator:
+//  - "Maysan Al Maqam Hotel" muncul dua kali di infografis Ajyad (no. 12 dan no. 17).
+//  - Beberapa waktu hotel (mis. no. 17: 7-10 menit) berada di luar rentang menit zonanya.
+var APP_VERSI = '0.3';
+var DATA_TANGGAL = '28 Oktober 2026';
+
+var ZONE_TINTS = ['#bfe0d0', '#d6ece2', '#e6f3ec', '#f0f8f3'];
+
 var areas = {
   ajyad: {
-    nama: "Ajyad",
-    gate: "Gate 1 — King Abdul Aziz Gate",
+    nama: 'Ajyad',
+    gate: 'Gate 1 — King Abdul Aziz Gate',
+    gateShort: 'Gate 1',
+    arah: 'selatan / tenggara',
+    zones: [
+      {nama: 'Klaster depan', jarak: '0–300 m', menit: '±1–7 menit'},
+      {nama: 'Koridor atas', jarak: '300–600 m', menit: '±5–10 menit'},
+      {nama: 'Koridor tengah', jarak: '600–900 m', menit: '±8–14 menit'},
+      {nama: 'Koridor bawah / lebih jauh', jarak: 'di atas 900 m', menit: '±12–20 menit'}
+    ],
     hotels: [
-      {id:1, nama:"Makkah Clock Royal Tower", waktu:"2-4 menit", catatan:"Banyak lift/eskalator, area sangat padat."},
-      {id:2, nama:"Swissotel Makkah", waktu:"2-4 menit", catatan:"Akses bertingkat, lobi dan eskalator berpengaruh."},
-      {id:3, nama:"Shafwah Hotel", waktu:"1-3 menit", catatan:"Relatif datar, dekat area depan Masjidil Haram."},
-      {id:4, nama:"Al Olayan Ajyad Hotel", waktu:"3-5 menit", catatan:"Akses sangat dekat, koridor depan Ajyad."},
-      {id:5, nama:"Azka Al Maqam", waktu:"3-5 menit", catatan:"Akses sangat dekat, koridor depan Ajyad."},
-      {id:6, nama:"Ajyad Crown Hotel", waktu:"3-6 menit", catatan:"Menanjak, akses terakhir cukup curam."},
-      {id:7, nama:"Orinsis Al Haram", waktu:"4-6 menit", catatan:"Relatif datar, koridor depan Ajyad."},
-      {id:8, nama:"Azka Al Safa", waktu:"4-7 menit", catatan:"Sedikit menanjak, posisi agak di belakang klaster depan."}
+      {n:'Makkah Clock Royal Tower', z:0, m:[2,4], c:'Banyak lift/eskalator; area sangat padat.'},
+      {n:'Swissotel Makkah', z:0, m:[2,4], c:'Akses bertingkat; lobi dan eskalator berpengaruh.'},
+      {n:'Shafwah Hotel', z:0, m:[1,3], c:'Relatif datar; dekat area depan Masjidil Haram / Safwa.'},
+      {n:'Al Olayan Ajyad Hotel', z:0, m:[3,5], c:'Akses sangat dekat; koridor depan Ajyad.'},
+      {n:'Azka Al Maqam', z:0, m:[3,5], c:'Akses sangat dekat; koridor depan Ajyad.'},
+      {n:'Ajyad Crown Hotel', z:0, m:[3,6], c:'Menanjak; akses terakhir cukup curam. Golf cart/shuttle dapat membantu — konfirmasi ketersediaan aktual.'},
+      {n:'Orinsis Al Haram', z:0, m:[4,6], c:'Relatif datar; koridor depan Ajyad.'},
+      {n:'Azka Al Safa', z:0, m:[4,7], c:'Sedikit menanjak; posisi agak di belakang klaster depan.'},
+      {n:'Le Meridien Makkah', z:1, m:[5,7], c:'Relatif datar; awal koridor atas.'},
+      {n:'Makarem Ajyad Makkah', z:1, m:[5,8], c:'Sedikit menanjak; koridor atas Ajyad.'},
+      {n:'Prestige Ajyad Hotel', z:1, m:[6,8], c:'Sedikit menanjak; cek pintu masuk hotel.'},
+      {n:'Maysan Al Maqam Hotel', z:1, m:[6,9], c:'Relatif datar; arus jamaah memengaruhi waktu.'},
+      {n:'Snood Ajyad', z:1, m:[6,9], c:'Sedikit menanjak; akses dari jalan utama cukup mudah.'},
+      {n:'Mather Al Eman Ajyad Hotel', z:1, m:[6,9], c:'Sedikit menanjak; jalur dari lobi ke jalan utama perlu diperhatikan.'},
+      {n:'Mira Ajyad Hotel', z:1, m:[6,9], c:'Sedikit menanjak; posisi pintu akses berpengaruh.'},
+      {n:'Ajyad Aljiwar Hotel', z:1, m:[6,9], c:'Relatif datar; akses praktis cukup nyaman.'},
+      {n:'Maysan Al Maqam Hotel', z:2, m:[7,10], c:'Sedikit menanjak; lokasi drop-off perlu dicek.'},
+      {n:'Ajwad Ajyad Hotel', z:2, m:[7,10], c:'Menanjak ringan; jalur hotel bervariasi.'},
+      {n:'Dallah Ajyad Hotel', z:2, m:[8,11], c:'Menanjak ringan; waktu tempuh bertambah saat padat.'},
+      {n:'Al Shohada Hotel', z:2, m:[8,11], c:'Menanjak; naik-turun terasa pada jam ramai.'},
+      {n:'Grand Al Massa / Almasa Grand Hotel', z:2, m:[8,12], c:'Menanjak; koridor tengah Ajyad.'},
+      {n:'Markad Ajyad Hotel', z:2, m:[9,12], c:'Menanjak ringan; rute ke Gate 1 perlu dicek.'},
+      {n:'Qasr Ajyad Al Sad Hotel', z:2, m:[9,12], c:'Menanjak; perlu tenaga lebih.'},
+      {n:'Wahat Al Diyafah Hotel', z:3, m:[12,16], c:'Menanjak; kontur membuat terasa lebih jauh saat kembali dari masjid.'},
+      {n:'Best Western Ajyad Makkah', z:3, m:[10,14], c:'Menanjak; terasa lebih jauh saat pulang.'},
+      {n:'Castle Ajyad Hotel', z:3, m:[15,20], c:'Menanjak cukup terasa; koridor bawah Ajyad.'}
     ]
   },
   jabalomar: {
-    nama: "Jabal Omar / Ash Shubaikah",
-    gate: "Gate 79 — King Fahd Gate",
+    nama: 'Jabal Omar / Ash Shubaikah',
+    gate: 'Gate 79 — King Fahd Gate',
+    gateShort: 'Gate 79',
+    arah: 'barat',
+    zones: [
+      {nama: 'Sangat dekat Gate 79', jarak: '250–450 m', menit: '±3–6 menit'},
+      {nama: 'Dekat / dalam Jabal Omar', jarak: '450–800 m', menit: '±6–10 menit'}
+    ],
     hotels: [
-      {id:9, nama:"Conrad Jabal Omar Makkah", waktu:"3-5 menit", catatan:"Sangat dekat; secara resmi disebut berhadapan dengan King Fahd Gate."},
-      {id:10, nama:"Hilton Suites Jabal Omar Makkah", waktu:"3-5 menit", catatan:"Sangat dekat; berhadapan dengan King Fahd dan King Abdullah gates; akses mall membantu."},
-      {id:11, nama:"Jabal Omar Marriott Hotel", waktu:"4-6 menit", catatan:"Sangat dekat; hotel menyebut sekitar 3 menit ke Grand Mosque; lift/podium memengaruhi waktu."},
-      {id:12, nama:"Hilton Hotel & Convention Jabal Omar Makkah", waktu:"6-8 menit", catatan:"Dekat; di distrik Jabal Omar berhadapan dengan Haram, tetapi waktu dipengaruhi akses tower/podium."},
-      {id:13, nama:"DoubleTree by Hilton Jabal Omar Makkah", waktu:"7-10 menit", catatan:"Dekat; short walk ke Masjidil Haram, dengan akses privat ke Jabal Omar Mall."}
+      {n:'Conrad Jabal Omar Makkah', z:0, m:[3,5], c:'Sangat dekat; secara resmi disebut berhadapan dengan King Fahd Gate.'},
+      {n:'Hilton Suites Jabal Omar Makkah', z:0, m:[3,5], c:'Sangat dekat; berhadapan dengan King Fahd dan King Abdullah gates; akses mall membantu.'},
+      {n:'Jabal Omar Marriott Hotel', z:0, m:[4,6], c:'Sangat dekat; hotel menyebut sekitar 3 menit ke Grand Mosque; lift/podium memengaruhi waktu.'},
+      {n:'Hilton Hotel & Convention Jabal Omar Makkah', z:1, m:[6,8], c:'Dekat; di distrik Jabal Omar berhadapan dengan Haram, tetapi waktu dipengaruhi akses tower/podium.'},
+      {n:'DoubleTree by Hilton Jabal Omar Makkah', z:1, m:[7,10], c:'Dekat; short walk ke Masjidil Haram, dengan akses privat ke Jabal Omar Mall.'}
     ]
   }
 };
 
-var currentArea = 'ajyad'; // kawasan yang sedang aktif dilihat
+// ===== TATA LETAK PETA RADIAL (fungsi murni, diuji otomatis) =====
+var CX = 190, CY = 58, R0 = 46, ANG_MIN = 36, ANG_MAX = 144, DOT_R = 10;
+
+function rad(d){ return d * Math.PI / 180; }
+
+function zoneThickness(nZones){ return Math.min(80, Math.floor(222 / nZones)); }
+
+function layoutArea(area){
+  var n = area.zones.length;
+  var T = zoneThickness(n);
+  var byZone = [];
+  var z, i;
+  for (z = 0; z < n; z++) byZone.push([]);
+  for (i = 0; i < area.hotels.length; i++) byZone[area.hotels[i].z].push(i);
+  var dots = [];
+  for (z = 0; z < n; z++){
+    var list = byZone[z];
+    var m = list.length;
+    var inner = R0 + T * z;
+    var step = m > 1 ? Math.min(88 / m, 22) : 0;
+    for (var j = 0; j < m; j++){
+      var ang = 90 + (j - (m - 1) / 2) * step;
+      var frac = m <= 3 ? 0.5 : (j % 2 === 0 ? 0.28 : 0.72);
+      var r = inner + T * frac;
+      dots.push({
+        idx: list[j],
+        no: list[j] + 1,
+        zona: z,
+        r: r,
+        ang: ang,
+        x: CX + r * Math.cos(rad(ang)),
+        y: CY + r * Math.sin(rad(ang))
+      });
+    }
+  }
+  dots.sort(function(a, b){ return a.idx - b.idx; });
+  return {T: T, nZones: n, rMax: R0 + T * n, dots: dots, height: Math.ceil(CY + R0 + T * n + 24)};
+}
+
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function waktuTeks(h){ return '±' + h.m[0] + '–' + h.m[1] + ' menit'; }
+//#CORE-END
+
+var currentArea = 'ajyad';
+var currentHotelIdx = null;
+var selectedNo = null;
+var activeScreen = 'home';
+var petaFrom = 'home';
 
 function pilihKawasan(kode){
   currentArea = kode;
+  currentHotelIdx = null;
   showScreen('cari');
 }
 
 function showScreen(id){
-  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  if(id === 'peta' && activeScreen !== 'peta'){ petaFrom = activeScreen; }
+  activeScreen = id;
+  var all = document.querySelectorAll('.screen');
+  for(var i = 0; i < all.length; i++){ all[i].classList.remove('active'); }
   document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('aktif');});
-  if(id==='home') document.getElementById('nav-home').classList.add('aktif');
-  if(id==='cari' || id==='pilih-kawasan-cari') document.getElementById('nav-cari').classList.add('aktif');
-  if(id==='peta' || id==='pilih-kawasan-peta') document.getElementById('nav-peta').classList.add('aktif');
-  if(id==='tersesat') document.getElementById('nav-tersesat').classList.add('aktif');
-  window.scrollTo(0,0);
-  if(id==='cari'){
+  var navs = document.querySelectorAll('.nav-item');
+  for(var k = 0; k < navs.length; k++){ navs[k].classList.remove('aktif'); }
+  if(id === 'home') document.getElementById('nav-home').classList.add('aktif');
+  if(id === 'cari') document.getElementById('nav-cari').classList.add('aktif');
+  if(id === 'peta') document.getElementById('nav-peta').classList.add('aktif');
+  if(id === 'tersesat') document.getElementById('nav-tersesat').classList.add('aktif');
+  window.scrollTo(0, 0);
+  if(id === 'cari'){
     document.getElementById('kotak-cari').value = '';
     document.getElementById('cari-judul-kawasan').textContent = 'Cari hotel — ' + areas[currentArea].nama;
-    renderHotelList(areas[currentArea].hotels);
+    renderHotelList('');
   }
-  if(id==='peta'){
-    document.getElementById('peta-judul-kawasan').textContent = 'Peta area ' + areas[currentArea].nama;
-    renderPetaKawasan(currentArea);
+  if(id === 'peta'){
+    selectedNo = (currentHotelIdx !== null) ? currentHotelIdx + 1 : null;
+    document.getElementById('peta-judul-kawasan').textContent = 'Peta ' + areas[currentArea].nama;
+    renderPeta();
+  }
+  if(id === 'tentang'){
+    document.getElementById('tentang-versi').textContent =
+      'Versi aplikasi ' + APP_VERSI + ' · data diperbarui ' + DATA_TANGGAL + '. Semua data hotel masih berstatus estimasi.';
   }
 }
 
-function renderHotelList(list){
+function petaKembali(){ showScreen(petaFrom || 'home'); }
+
+function renderHotelList(q){
+  var a = areas[currentArea];
   var wrap = document.getElementById('daftar-hotel');
   wrap.innerHTML = '';
-  if(list.length===0){
-    wrap.innerHTML = '<p style="color:var(--teks-lembut);text-align:center;padding:20px;">Hotel tidak ditemukan dalam data demo ini.</p>';
-    return;
-  }
-  var namaArea = areas[currentArea].nama;
-  var gateArea = areas[currentArea].gate.split(' — ')[0];
-  list.forEach(function(h){
+  var ketemu = 0;
+  var query = q.toLowerCase();
+  a.hotels.forEach(function(h, idx){
+    if(query && h.n.toLowerCase().indexOf(query) === -1) return;
+    ketemu++;
     var div = document.createElement('div');
     div.className = 'kartu';
     div.style.cursor = 'pointer';
-    div.onclick = function(){ openDetail(h); };
-    div.innerHTML = '<h3>'+h.nama+'</h3><p class="sub">Kawasan '+namaArea+' &middot; &plusmn;'+h.waktu+' ke '+gateArea+'</p><span class="label-status status-estimasi">ESTIMASI</span>';
+    div.onclick = function(){ openHotel(idx); };
+    div.innerHTML = '<h3>' + esc(h.n) + '</h3><p class="sub">' + a.zones[h.z].nama + ' &middot; ' + waktuTeks(h) + ' ke ' + a.gateShort + '</p><span class="label-status status-estimasi">ESTIMASI</span>';
     wrap.appendChild(div);
   });
-}
-
-function filterHotel(){
-  var q = document.getElementById('kotak-cari').value.toLowerCase();
-  var hasil = areas[currentArea].hotels.filter(function(h){ return h.nama.toLowerCase().indexOf(q) !== -1; });
-  renderHotelList(hasil);
-}
-
-function openDetail(h){
-  var a = areas[currentArea];
-  document.getElementById('detail-nama').textContent = h.nama;
-  document.getElementById('detail-kawasan').textContent = 'Kawasan ' + a.nama;
-  document.getElementById('detail-gate').textContent = a.gate;
-  document.getElementById('detail-waktu').textContent = '\u00b1' + h.waktu;
-  document.getElementById('detail-catatan').textContent = h.catatan;
-  document.getElementById('keharam-gate').textContent = a.gate;
-  document.getElementById('pulang-gate').textContent = 'Dari ' + a.gate.split(' — ')[0] + ', arah kembali';
-  showScreen('detail');
-}
-
-function renderPetaKawasan(kode){
-  var wrap = document.getElementById('peta-svg-wrap');
-  if(kode === 'ajyad'){
-    wrap.innerHTML = svgPetaAjyad();
-  } else if(kode === 'jabalomar'){
-    wrap.innerHTML = svgPetaJabalOmar();
+  if(ketemu === 0){
+    wrap.innerHTML = '<p style="color:var(--teks-lembut);text-align:center;padding:20px;">Hotel tidak ditemukan dalam data demo ini.</p>';
   }
 }
 
-function svgPetaAjyad(){
-  return '<svg viewBox="0 0 320 380" style="width:100%;height:auto;" role="img" aria-label="Diagram skematis koridor Ajyad menuju Gate 1">'
-    + '<rect x="120" y="16" width="80" height="40" rx="8" fill="#0f4d3c"/>'
-    + '<text x="160" y="34" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Ka\'bah</text>'
-    + '<text x="160" y="48" text-anchor="middle" fill="#fff" font-size="11">Masjidil Haram</text>'
-    + '<line x1="160" y1="56" x2="160" y2="88" stroke="#146c53" stroke-width="4"/>'
-    + '<rect x="105" y="88" width="110" height="34" rx="8" fill="#e3f2ec" stroke="#146c53" stroke-width="2"/>'
-    + '<text x="160" y="109" text-anchor="middle" fill="#0f4d3c" font-size="12" font-weight="700">Gate 1 — King Abdul Aziz</text>'
-    + '<line x1="160" y1="122" x2="160" y2="150" stroke="#146c53" stroke-width="4"/>'
-    + '<rect x="40" y="150" width="240" height="60" rx="8" fill="#fbf3e1" stroke="#a9781f" stroke-width="2"/>'
-    + '<text x="160" y="172" text-anchor="middle" fill="#a9781f" font-size="12" font-weight="700">Klaster depan Ajyad</text>'
-    + '<text x="160" y="190" text-anchor="middle" fill="#4a4a46" font-size="11">0-300m, sekitar 1-7 menit</text>'
-    + '<text x="160" y="204" text-anchor="middle" fill="#4a4a46" font-size="10">8 hotel &middot; termasuk Swissotel, Clock Tower</text>'
-    + '<line x1="160" y1="210" x2="160" y2="238" stroke="#d8d5cb" stroke-width="4"/>'
-    + '<rect x="40" y="238" width="240" height="50" rx="8" fill="#f0ede4" stroke="#b4b2a9" stroke-width="2"/>'
-    + '<text x="160" y="258" text-anchor="middle" fill="#4a4a46" font-size="12" font-weight="700">Koridor atas dan tengah Ajyad</text>'
-    + '<text x="160" y="275" text-anchor="middle" fill="#6a6a66" font-size="10">300-900m &middot; lebih jauh dari Gate 1</text>'
-    + '<line x1="160" y1="288" x2="160" y2="316" stroke="#d8d5cb" stroke-width="4"/>'
-    + '<rect x="60" y="316" width="200" height="40" rx="8" fill="#f0ede4" stroke="#b4b2a9" stroke-width="2"/>'
-    + '<text x="160" y="340" text-anchor="middle" fill="#6a6a66" font-size="11">Koridor bawah/lebih jauh (&gt;900m)</text>'
-    + '</svg>';
+function filterHotel(){
+  renderHotelList(document.getElementById('kotak-cari').value);
 }
 
-function svgPetaJabalOmar(){
-  return '<svg viewBox="0 0 320 340" style="width:100%;height:auto;" role="img" aria-label="Diagram skematis koridor Jabal Omar menuju Gate 79">'
-    + '<rect x="120" y="16" width="80" height="40" rx="8" fill="#0f4d3c"/>'
-    + '<text x="160" y="34" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Ka\'bah</text>'
-    + '<text x="160" y="48" text-anchor="middle" fill="#fff" font-size="11">Masjidil Haram</text>'
-    + '<line x1="160" y1="56" x2="160" y2="88" stroke="#146c53" stroke-width="4"/>'
-    + '<rect x="100" y="88" width="120" height="34" rx="8" fill="#e3f2ec" stroke="#146c53" stroke-width="2"/>'
-    + '<text x="160" y="109" text-anchor="middle" fill="#0f4d3c" font-size="12" font-weight="700">Gate 79 — King Fahd Gate</text>'
-    + '<line x1="160" y1="122" x2="160" y2="150" stroke="#146c53" stroke-width="4"/>'
-    + '<rect x="40" y="150" width="240" height="56" rx="8" fill="#fbf3e1" stroke="#a9781f" stroke-width="2"/>'
-    + '<text x="160" y="172" text-anchor="middle" fill="#a9781f" font-size="12" font-weight="700">Koridor sangat dekat Gate 79</text>'
-    + '<text x="160" y="190" text-anchor="middle" fill="#4a4a46" font-size="11">250-450m, sekitar 3-6 menit</text>'
-    + '<text x="160" y="200" text-anchor="middle" fill="#4a4a46" font-size="10">Conrad, Hilton Suites, Marriott</text>'
-    + '<line x1="160" y1="206" x2="160" y2="234" stroke="#d8d5cb" stroke-width="4"/>'
-    + '<rect x="40" y="234" width="240" height="56" rx="8" fill="#f0ede4" stroke="#b4b2a9" stroke-width="2"/>'
-    + '<text x="160" y="256" text-anchor="middle" fill="#4a4a46" font-size="12" font-weight="700">Koridor dekat/dalam Jabal Omar</text>'
-    + '<text x="160" y="274" text-anchor="middle" fill="#6a6a66" font-size="11">450-800m, sekitar 6-10 menit</text>'
-    + '<text x="160" y="284" text-anchor="middle" fill="#6a6a66" font-size="10">Hilton Convention, DoubleTree</text>'
-    + '</svg>';
+function openHotel(idx){
+  var a = areas[currentArea];
+  var h = a.hotels[idx];
+  currentHotelIdx = idx;
+  document.getElementById('detail-nama').textContent = h.n;
+  document.getElementById('detail-kawasan').textContent = 'Kawasan ' + a.nama + ' · ' + a.zones[h.z].nama + ' (kira-kira ' + a.zones[h.z].jarak + ')';
+  document.getElementById('detail-gate').textContent = a.gate;
+  document.getElementById('detail-waktu').textContent = waktuTeks(h);
+  document.getElementById('detail-catatan').textContent = h.c;
+  document.getElementById('keharam-gate').textContent = a.gate;
+  document.getElementById('pulang-gate').textContent = 'Dari ' + a.gateShort + ', arah kembali';
+  showScreen('detail');
 }
 
-// Daftarkan service worker supaya app bisa dipakai offline setelah dibuka pertama kali.
-// Ini hanya berfungsi kalau file dibuka lewat https:// atau localhost, bukan file:// langsung.
+function buildRadialSvg(area, selNo){
+  var L = layoutArea(area);
+  var s = '<svg viewBox="0 0 380 ' + L.height + '" width="100%" role="img" aria-label="Peta radial kawasan ' + esc(area.nama) + '">';
+  var fx = CX + 600 * Math.cos(rad(ANG_MIN));
+  var fy = CY + 600 * Math.sin(rad(ANG_MIN));
+  var gx = CX + 600 * Math.cos(rad(ANG_MAX));
+  s += '<defs><clipPath id="kipas"><polygon points="' + CX + ',' + CY + ' ' + fx.toFixed(1) + ',' + fy.toFixed(1) + ' ' + gx.toFixed(1) + ',' + fy.toFixed(1) + '"/></clipPath></defs>';
+  s += '<g clip-path="url(#kipas)">';
+  for(var k = L.nZones; k >= 1; k--){
+    s += '<circle cx="' + CX + '" cy="' + CY + '" r="' + (R0 + L.T * k) + '" fill="' + ZONE_TINTS[k - 1] + '" stroke="#8fbfa9" stroke-width="1"/>';
+  }
+  s += '</g>';
+  s += '<text x="372" y="14" text-anchor="end" dominant-baseline="central" font-size="12" fill="#4a4a46">Posisi: ' + area.arah + '</text>';
+  s += '<ellipse cx="' + CX + '" cy="' + CY + '" rx="56" ry="28" fill="#f0ede4" stroke="#b4b2a9" stroke-width="1"/>';
+  s += '<ellipse cx="' + CX + '" cy="' + CY + '" rx="34" ry="16" fill="none" stroke="#cfcab8" stroke-width="1"/>';
+  s += '<rect x="' + (CX - 7) + '" y="' + (CY - 7) + '" width="14" height="14" rx="2" fill="#1a1a18"/>';
+  s += '<text x="' + (CX - 66) + '" y="' + CY + '" text-anchor="end" dominant-baseline="central" font-size="14" font-weight="700" fill="#1a1a18">Masjidil Haram</text>';
+  s += '<rect x="' + (CX - 34) + '" y="76" width="68" height="20" rx="10" fill="#0f4d3c"/>';
+  s += '<text x="' + CX + '" y="86" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff">' + area.gateShort + '</text>';
+  var ordered = L.dots.slice().sort(function(a, b){
+    return (a.no === selNo ? 1 : 0) - (b.no === selNo ? 1 : 0);
+  });
+  ordered.forEach(function(d){
+    var sel = (d.no === selNo);
+    var nm = area.hotels[d.idx].n;
+    s += '<g data-no="' + d.no + '" role="button" aria-label="Hotel nomor ' + d.no + ', ' + esc(nm) + '" style="cursor:pointer">';
+    s += '<circle cx="' + d.x.toFixed(1) + '" cy="' + d.y.toFixed(1) + '" r="16" fill="transparent"/>';
+    if(sel){
+      s += '<circle cx="' + d.x.toFixed(1) + '" cy="' + d.y.toFixed(1) + '" r="17" fill="none" stroke="#a9781f" stroke-width="2"/>';
+      s += '<circle cx="' + d.x.toFixed(1) + '" cy="' + d.y.toFixed(1) + '" r="13" fill="#a9781f" stroke="#7a5512" stroke-width="2"/>';
+      s += '<text x="' + d.x.toFixed(1) + '" y="' + d.y.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff">' + d.no + '</text>';
+    } else {
+      s += '<circle cx="' + d.x.toFixed(1) + '" cy="' + d.y.toFixed(1) + '" r="' + DOT_R + '" fill="#ffffff" stroke="#146c53" stroke-width="2"/>';
+      s += '<text x="' + d.x.toFixed(1) + '" y="' + d.y.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#0f4d3c">' + d.no + '</text>';
+    }
+    s += '</g>';
+  });
+  s += '</svg>';
+  return s;
+}
+
+function renderPeta(){
+  var a = areas[currentArea];
+  var wrap = document.getElementById('peta-svg-wrap');
+  wrap.innerHTML = buildRadialSvg(a, selectedNo);
+  wrap.onclick = function(e){
+    var el = e.target;
+    while(el && el !== wrap){
+      if(el.getAttribute && el.getAttribute('data-no')){
+        tandaiNomor(parseInt(el.getAttribute('data-no'), 10));
+        return;
+      }
+      el = el.parentNode;
+    }
+  };
+  var leg = document.getElementById('peta-legenda');
+  var html = '';
+  a.zones.forEach(function(zn, zi){
+    html += '<div class="zona-judul"><span class="swatch" style="background:' + ZONE_TINTS[zi] + '"></span><div><b>' + zn.nama + '</b><span class="info">' + zn.jarak + ' &middot; ' + zn.menit + '</span></div></div>';
+    a.hotels.forEach(function(h, idx){
+      if(h.z !== zi) return;
+      var no = idx + 1;
+      var cls = 'baris-hotel' + (no === selectedNo ? ' terpilih' : '');
+      var anda = (idx === currentHotelIdx) ? '<small>Hotel yang Anda buka</small>' : '';
+      html += '<button class="' + cls + '" id="baris-' + no + '" onclick="openHotel(' + idx + ')"><span class="no">' + no + '</span><span class="nm">' + esc(h.n) + anda + '</span><span class="wk">' + waktuTeks(h) + '</span></button>';
+    });
+  });
+  leg.innerHTML = html;
+  if(selectedNo !== null){
+    var row = document.getElementById('baris-' + selectedNo);
+    if(row && currentHotelIdx === null){ try{ row.scrollIntoView({block:'center'}); }catch(err){} }
+  }
+}
+
+function tandaiNomor(no){
+  selectedNo = no;
+  var a = areas[currentArea];
+  document.getElementById('peta-svg-wrap').innerHTML = buildRadialSvg(a, selectedNo);
+  var rows = document.querySelectorAll('.baris-hotel');
+  for(var i = 0; i < rows.length; i++){ rows[i].classList.remove('terpilih'); }
+  var row = document.getElementById('baris-' + no);
+  if(row){
+    row.classList.add('terpilih');
+    try{ row.scrollIntoView({block:'center', behavior:'smooth'}); }catch(err){ row.scrollIntoView(); }
+  }
+}
+
+// Service worker: simpan app di HP supaya jalan offline. Kalau ada versi baru dan HP online,
+// versi baru dimuat otomatis (halaman dimuat ulang sekali). Hanya jalan lewat https:// atau localhost.
 if('serviceWorker' in navigator){
+  var punyaKontrol = !!navigator.serviceWorker.controller;
+  var sudahReload = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(punyaKontrol && !sudahReload){ sudahReload = true; window.location.reload(); }
+  });
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
-      console.log('Service worker aktif:', reg.scope);
-    }).catch(function(err){
+    navigator.serviceWorker.register('sw.js').catch(function(err){
       console.log('Service worker gagal daftar (normal kalau dibuka dari file lokal):', err);
     });
   });
@@ -529,4 +708,3 @@ if('serviceWorker' in navigator){
 
 </body>
 </html>
-
