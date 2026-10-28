@@ -4,7 +4,7 @@
 // Ketika ada versi baru, naikkan CACHE_NAME supaya cache lama dibuang
 // dan file baru diunduh ulang.
 
-var CACHE_NAME = 'jemaah-plus-v1';
+var CACHE_NAME = 'jemaah-plus-v2';
 var FILES_TO_CACHE = [
   './',
   './index.html',
