@@ -1,12 +1,18 @@
-// JEMAAH+ service worker v3
+// JEMAAH+ service worker v9
 // Strategi: network-first dengan batas waktu 3 detik, lalu cadangan dari cache.
 // Online  -> selalu ambil versi terbaru (dan simpan ke cache).
 // Offline -> pakai versi tersimpan, sehingga aplikasi tetap jalan di dalam masjid / tanpa sinyal.
-var CACHE_NAME = 'jemaah-plus-v3';
+var CACHE_NAME = 'jemaah-plus-v9';
 var FILES_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './img/ajyad.jpg',
+  './img/jabalomar.jpg',
+  './img/jarwal.jpg',
+  './img/jabalkabah.jpg',
+  './img/misfalah.jpg',
+  './img/mahbas.jpg',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-192-maskable.png'

@@ -188,6 +188,15 @@
   }
 
   .petunjuk{font-size:15px;color:var(--teks-lembut);margin:4px 2px 14px;}
+  .peta-scroll{overflow:auto;-webkit-overflow-scrolling:touch;max-height:78vh;border-radius:8px;}
+  #peta-svg-wrap{width:100%;}
+  .zoom-bar{display:flex;gap:8px;margin-bottom:8px;}
+  .zoom-bar button{
+    min-width:56px;height:48px;border-radius:10px;
+    border:2px solid var(--hijau);background:#fff;color:var(--hijau-tua);
+    font-size:24px;font-weight:700;
+  }
+  .zoom-bar button.lebar{flex:1;font-size:16px;}
   .zona-judul{
     display:flex;align-items:center;gap:10px;
     margin:18px 0 8px;
@@ -220,7 +229,13 @@
   }
   .baris-hotel .nm{flex:1;line-height:1.25;}
   .baris-hotel .nm small{display:block;font-size:13px;color:var(--emas);font-weight:700;}
-  .baris-hotel .wk{font-size:14px;color:var(--teks-lembut);white-space:nowrap;}
+  .baris-hotel .wk{font-size:14px;color:var(--teks-lembut);text-align:right;max-width:112px;line-height:1.25;}
+  .rantai{background:#fff;border:1px solid var(--garis);border-radius:12px;padding:12px 14px;margin:0 0 12px;font-size:16px;}
+  .rantai b{display:block;margin-bottom:4px;}
+  .kv{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--garis);font-size:16px;}
+  .kv:first-child{border-top:none;}
+  .kv .k{flex:0 0 118px;color:var(--teks-lembut);font-size:14px;}
+  .kv .v{flex:1;font-weight:600;}
   .baris-hotel.terpilih{background:var(--emas-muda);border:2px solid var(--emas);}
   .baris-hotel.terpilih .no{background:var(--emas);border-color:#7a5512;color:#fff;}
 </style>
@@ -238,7 +253,7 @@
   <!-- HOME -->
   <section class="screen active" id="home">
     <div class="peringatan">
-      Ini versi demo dengan 2 kawasan contoh, untuk uji coba. Belum semua kawasan tersedia, dan waktu jalan kaki di sini masih estimasi, belum diverifikasi langsung di lapangan.
+      Ini versi demo dengan 6 kawasan contoh, untuk uji coba. Belum semua kawasan tersedia, dan waktu jalan kaki di sini masih estimasi, belum diverifikasi langsung di lapangan.
     </div>
 
     <p style="font-weight:700;margin-bottom:10px;">Pilih kawasan hotel Anda:</p>
@@ -247,6 +262,18 @@
     </button>
     <button class="btn-besar" onclick="pilihKawasan('jabalomar')">
       <span class="ikon">&#127968;</span> Jabal Omar / Ash Shubaikah
+    </button>
+    <button class="btn-besar" onclick="pilihKawasan('jarwal')">
+      <span class="ikon">&#127968;</span> Jarwal
+    </button>
+    <button class="btn-besar" onclick="pilihKawasan('jabalkabah')">
+      <span class="ikon">&#127968;</span> Jabal Al Ka'bah
+    </button>
+    <button class="btn-besar" onclick="pilihKawasan('misfalah')">
+      <span class="ikon">&#127968;</span> Misfalah / Ibrahim Al Khalil
+    </button>
+    <button class="btn-besar" onclick="pilihKawasan('mahbas')">
+      <span class="ikon">&#127968;</span> Mahbas Al Jin
     </button>
     <button class="btn-besar sekunder" onclick="showScreen('tersesat')">
       <span class="ikon">&#9888;&#65039;</span> Saya tersesat
@@ -262,10 +289,17 @@
       <button class="back-btn" onclick="petaKembali()">&#8592;</button>
       <h2 id="peta-judul-kawasan">Peta area</h2>
     </div>
-    <div class="kartu" style="padding:8px;" id="peta-svg-wrap"></div>
+    <div class="kartu" style="padding:8px;">
+      <div class="zoom-bar" id="zoom-bar" style="display:none;">
+        <button type="button" onclick="ubahZoom(-1)" aria-label="Perkecil">&#8722;</button>
+        <button type="button" onclick="ubahZoom(0)" class="lebar">Pas layar</button>
+        <button type="button" onclick="ubahZoom(1)" aria-label="Perbesar">+</button>
+      </div>
+      <div class="peta-scroll" id="peta-scroll"><div id="peta-svg-wrap"></div></div>
+    </div>
     <p class="petunjuk">Ketuk nomor di peta untuk menandai hotelnya di daftar. Ketuk nama hotel untuk membuka detail.</p>
     <div id="peta-legenda"></div>
-    <div class="peringatan">Peta ini skematis, bukan peta presisi. Jarak dan arah disederhanakan, dan kipas digambar ke bawah agar muat di layar. Arah sebenarnya tertulis di pojok kanan atas peta. Posisi titik di dalam satu cincin tidak menunjukkan letak hotel yang sebenarnya.</div>
+    <div class="peringatan" id="peta-peringatan"></div>
   </section>
 
   <!-- CARI HOTEL -->
@@ -289,7 +323,8 @@
     </div>
     <div class="kartu">
       <p class="sub" id="detail-kawasan">Kawasan</p>
-      <p><strong>Akses ke <span id="detail-gate"></span>:</strong> <span id="detail-waktu"></span></p>
+      <p id="detail-akses"><strong>Akses ke <span id="detail-gate"></span>:</strong> <span id="detail-waktu"></span></p>
+      <div id="detail-shuttle" style="display:none;"></div>
       <p id="detail-catatan" style="color:var(--teks-lembut);font-size:15px;"></p>
       <span class="label-status status-estimasi" id="detail-status">ESTIMASI, BELUM DIVERIFIKASI</span>
     </div>
@@ -315,9 +350,12 @@
       <h3 id="keharam-gate">Gate</h3>
       <p style="color:var(--teks-lembut);">Titik acuan untuk kawasan ini</p>
     </div>
+    <div id="keharam-umum">
     <div class="langkah"><div class="nomor">1</div><p>Keluar dari lobi hotel, tanyakan arah gate acuan ke petugas hotel bila belum yakin.</p></div>
     <div class="langkah"><div class="nomor">2</div><p>Ikuti arah menuju gate, ikuti kerumunan jamaah yang searah tujuan yang sama.</p></div>
     <div class="langkah"><div class="nomor">3</div><p>Perhatikan papan nama gate untuk memastikan Anda menuju gate yang benar.</p></div>
+    </div>
+    <div id="keharam-shuttle" style="display:none;"></div>
     <button class="btn-besar sekunder" onclick="showScreen('peta')">
       <span class="ikon">&#128506;&#65039;</span> Lihat peta area
     </button>
@@ -332,7 +370,7 @@
     </div>
     <div class="kartu">
       <p class="sub" id="pulang-gate">Dari gate, arah kembali</p>
-      <p>Setelah keluar dari gate acuan, cari kembali arah kawasan hotel Anda. Ingat ciri hotel Anda (warna gedung, nama depan) untuk memudahkan pencarian saat ramai.</p>
+      <p id="pulang-teks">Setelah keluar dari gate acuan, cari kembali arah kawasan hotel Anda. Ingat ciri hotel Anda (warna gedung, nama depan) untuk memudahkan pencarian saat ramai.</p>
     </div>
     <div class="peringatan">Jika bingung arah pulang, gunakan tombol "Saya tersesat" dari menu utama.</div>
   </section>
@@ -413,10 +451,12 @@
 // belum diverifikasi lapangan. Catatan kualitas data yang perlu dicek Data Curator:
 //  - "Maysan Al Maqam Hotel" muncul dua kali di infografis Ajyad (no. 12 dan no. 17).
 //  - Beberapa waktu hotel (mis. no. 17: 7-10 menit) berada di luar rentang menit zonanya.
-var APP_VERSI = '0.3';
+var APP_VERSI = '0.9';
 var DATA_TANGGAL = '28 Oktober 2026';
 
 var ZONE_TINTS = ['#bfe0d0', '#d6ece2', '#e6f3ec', '#f0f8f3'];
+var ZONE_COLORS = ['#0f6b4f', '#c2410c', '#b0215a', '#5b3f9e'];
+var STATUS_COLORS = ['#0f6b4f', '#1d4ed8', '#c2410c'];
 
 var areas = {
   ajyad: {
@@ -425,14 +465,18 @@ var areas = {
     gateShort: 'Gate 1',
     arah: 'selatan / tenggara',
     zones: [
-      {nama: 'Klaster depan', jarak: '0–300 m', menit: '±1–7 menit'},
-      {nama: 'Koridor atas', jarak: '300–600 m', menit: '±5–10 menit'},
-      {nama: 'Koridor tengah', jarak: '600–900 m', menit: '±8–14 menit'},
-      {nama: 'Koridor bawah / lebih jauh', jarak: 'di atas 900 m', menit: '±12–20 menit'}
+      {nama: 'Klaster depan', jarak: '0–300 m', menit: '±1–7 menit', batas: '300 m'},
+      {nama: 'Koridor atas', jarak: '300–600 m', menit: '±5–10 menit', batas: '600 m'},
+      {nama: 'Koridor tengah', jarak: '600–900 m', menit: '±8–14 menit', batas: '900 m'},
+      {nama: 'Koridor bawah / lebih jauh', jarak: 'di atas 900 m', menit: '±12–20 menit', batas: ''}
     ],
+    // Ilustrasi latar (dibuat dengan AI, BUKAN peta nyata). Ukuran dan titik acuan dalam piksel gambar.
+    // cx,cy = pusat Ka'bah pada gambar; r0 = jari-jari awal zona pertama; t = tebal tiap zona.
+    poster: {src: 'img/ajyad.jpg', w: 768, h: 1416, cx: 384, cy: 238, r0: 330, t: 212, gateUp: 40,
+             menara: [650, 150]},
     hotels: [
-      {n:'Makkah Clock Royal Tower', z:0, m:[2,4], c:'Banyak lift/eskalator; area sangat padat.'},
-      {n:'Swissotel Makkah', z:0, m:[2,4], c:'Akses bertingkat; lobi dan eskalator berpengaruh.'},
+      {n:'Makkah Clock Royal Tower', z:0, pos:[629,440], m:[2,4], c:'Banyak lift/eskalator; area sangat padat.'},
+      {n:'Swissotel Makkah', z:0, pos:[534,520], m:[2,4], c:'Akses bertingkat; lobi dan eskalator berpengaruh.'},
       {n:'Shafwah Hotel', z:0, m:[1,3], c:'Relatif datar; dekat area depan Masjidil Haram / Safwa.'},
       {n:'Al Olayan Ajyad Hotel', z:0, m:[3,5], c:'Akses sangat dekat; koridor depan Ajyad.'},
       {n:'Azka Al Maqam', z:0, m:[3,5], c:'Akses sangat dekat; koridor depan Ajyad.'},
@@ -465,15 +509,114 @@ var areas = {
     gateShort: 'Gate 79',
     arah: 'barat',
     zones: [
-      {nama: 'Sangat dekat Gate 79', jarak: '250–450 m', menit: '±3–6 menit'},
-      {nama: 'Dekat / dalam Jabal Omar', jarak: '450–800 m', menit: '±6–10 menit'}
+      {nama: 'Sangat dekat Gate 79', jarak: '250–450 m', menit: '±3–6 menit', batas: '450 m'},
+      {nama: 'Dekat / dalam Jabal Omar', jarak: '450–800 m', menit: '±6–10 menit', batas: '800 m'}
     ],
+    // Ilustrasi AI (bukan peta nyata). Gambar sudah dipotong dan diperkecil: pusat Ka'bah di (384, 261).
+    poster: {src: 'img/jabalomar.jpg', w: 768, h: 1285, cx: 384, cy: 261, r0: 260, t: 250, gateUp: 40},
     hotels: [
       {n:'Conrad Jabal Omar Makkah', z:0, m:[3,5], c:'Sangat dekat; secara resmi disebut berhadapan dengan King Fahd Gate.'},
       {n:'Hilton Suites Jabal Omar Makkah', z:0, m:[3,5], c:'Sangat dekat; berhadapan dengan King Fahd dan King Abdullah gates; akses mall membantu.'},
       {n:'Jabal Omar Marriott Hotel', z:0, m:[4,6], c:'Sangat dekat; hotel menyebut sekitar 3 menit ke Grand Mosque; lift/podium memengaruhi waktu.'},
       {n:'Hilton Hotel & Convention Jabal Omar Makkah', z:1, m:[6,8], c:'Dekat; di distrik Jabal Omar berhadapan dengan Haram, tetapi waktu dipengaruhi akses tower/podium.'},
       {n:'DoubleTree by Hilton Jabal Omar Makkah', z:1, m:[7,10], c:'Dekat; short walk ke Masjidil Haram, dengan akses privat ke Jabal Omar Mall.'}
+    ]
+  },
+  jarwal: {
+    nama: 'Jarwal',
+    gate: 'Gate 62 — Bab Al-Umrah',
+    gateShort: 'Gate 62',
+    arah: 'koridor Jarwal ke At Taysir',
+    zones: [
+      {nama: 'Koridor Jarwal depan', jarak: '650–1000 m', menit: '±8–14 menit', batas: '1000 m'},
+      {nama: 'Koridor Jarwal–At Taysir tengah', jarak: '1000–1300 m', menit: '±12–16 menit', batas: '1300 m'},
+      {nama: 'Koridor At Taysir / lebih jauh', jarak: '1300–1700 m', menit: '±15–20 menit', batas: ''}
+    ],
+    // Ilustrasi AI (bukan peta nyata). Gambar dipotong dan diperkecil: pusat Ka'bah di (384, 189).
+    poster: {src: 'img/jarwal.jpg', w: 768, h: 1187, cx: 384, cy: 189, r0: 225, t: 257, gateUp: 84},
+    hotels: [
+      {n:'Al Ebaa Hotel', z:0, m:[8,11], c:'Relatif dekat; ada naik-turun dan satu bagian tanjakan cukup terasa. Jalur melalui area Anjum dapat membantu.'},
+      {n:'Saraya Al Deafah Hotel', z:0, m:[10,14], c:'Sebelumnya bernama Nawazi Watheer. Masih walkable; rute bervariasi, sebagian cukup landai, tetapi bisa terasa lebih berat saat padat.'},
+      {n:'Amjad Al Deafah Hotel', z:1, m:[12,16], c:'Masih mungkin ditempuh berjalan; shuttle mulai relevan, terutama bagi lansia atau saat ramai.'},
+      {n:'Ramada by Wyndham Makkah Zad Al Tayseer', z:2, m:[15,20], c:'Lebih jauh; banyak jamaah mengandalkan shuttle, tetapi kualitas/frekuensi dapat bervariasi.'},
+      {n:'Al Kiswah Towers Hotel', z:2, m:[15,20], c:'Banyak mengandalkan shuttle; titik turun tidak selalu tepat di depan Gate 62 sehingga tetap ada jalan kaki tambahan.'},
+      {n:'Abraj Al Tayseer Tuwa Hotel', z:2, m:[15,20], c:'Walkable bagi sebagian jamaah, tetapi shuttle penting; dalam praktiknya sebagian jamaah lebih dekat ke gate utara 68-74.'}
+    ]
+  },
+  jabalkabah: {
+    nama: "Jabal Al Ka'bah / Harat Al Bab",
+    gate: 'Gate 100 — King Abdullah Gate',
+    gateShort: 'Gate 100',
+    arah: "koridor Jalan Jabal Al Ka'bah",
+    zones: [
+      {nama: 'Koridor sangat dekat Gate 100', jarak: '500–650 m', menit: '±7–10 menit', batas: '650 m'},
+      {nama: "Koridor dekat Jabal Al Ka'bah", jarak: '650–900 m', menit: '±8–12 menit', batas: '900 m'}
+    ],
+    // Ilustrasi AI (bukan peta nyata). Gambar diperkecil: pusat Ka'bah di (384, 184).
+    poster: {src: 'img/jabalkabah.jpg', w: 768, h: 1152, cx: 384, cy: 184, r0: 225, t: 300, gateUp: 95},
+    hotels: [
+      {n:'Anjum Hotel Makkah', z:0, m:[7,7], c:'Akses sangat dekat ke perluasan Raja Abdullah; lift/eskalator sangat membantu.'},
+      {n:'Tilal Jabal Al Kabah Hotel', z:0, m:[7,10], c:'Relatif dekat; saat kembali ke hotel tanjakan cukup terasa.'},
+      {n:'Owais Hotel', z:1, m:[8,11], c:'Menuju Haram cenderung turun; kembali menanjak, dengan bagian akhir cukup curam/bertangga.'},
+      {n:'Sheraton Makkah Jabal Al Kaaba Hotel', z:1, m:[10,12], c:'Relatif dekat tetapi rute dipengaruhi akses pejalan kaki; pulang terasa menanjak.'}
+    ]
+  },
+  misfalah: {
+    nama: 'Misfalah / Ibrahim Al Khalil',
+    gate: 'Gate 79 — King Fahd Gate',
+    gateShort: 'Gate 79',
+    arah: 'koridor Jl. Ibrahim Al Khalil',
+    zones: [
+      {nama: 'Koridor dekat Ibrahim Al Khalil', jarak: '0–400 m', menit: '±3–7 menit', batas: '400 m'},
+      {nama: 'Koridor atas Misfalah', jarak: '400–800 m', menit: '±6–10 menit', batas: '800 m'},
+      {nama: 'Koridor tengah Misfalah', jarak: '800–1200 m', menit: '±9–15 menit', batas: '1200 m'},
+      {nama: 'Koridor bawah / lebih jauh', jarak: 'di atas 1200 m', menit: '±12–22 menit', batas: ''}
+    ],
+    // Ilustrasi AI (bukan peta nyata). Gambar dipotong dan diperkecil: pusat Ka'bah di (384, 191).
+    poster: {src: 'img/misfalah.jpg', w: 768, h: 1175, cx: 384, cy: 191, r0: 230, t: 188, gateUp: 116},
+    hotels: [
+      {n:'Emaar Grand Hotel', z:0, m:[4,6], c:'Koridor utama Ibrahim Al Khalil; ramai tetapi akses relatif lurus.'},
+      {n:'Dar Al Eiman Al Khalil Hotel', z:0, m:[4,7], c:'Koridor utama; arus jamaah memengaruhi waktu.'},
+      {n:'Palestine Hotel Makkah', z:0, m:[5,7], c:'Relatif dekat; cek titik keluar hotel.'},
+      {n:'Golden Tulip Dar Al Khalil', z:1, m:[6,9], c:'Sumbu Ibrahim Al Khalil; akses cukup lurus.'},
+      {n:'Fajr Al Badea 4', z:1, m:[7,10], c:'Area Misfalah; sedikit menanjak di beberapa bagian.'},
+      {n:'Fajr Al Badea 5', z:1, m:[7,10], c:'Koridor Misfalah; rute keluar hotel bervariasi.'},
+      {n:'Mobark Al-Khalil Hotel', z:2, m:[9,13], c:'Lebih jauh; shuttle dapat membantu.'},
+      {n:'Al Fajr Al Badea 1 Hotel', z:2, m:[10,14], c:'Area Misfalah / Al Hijrah; pulang terasa lebih berat.'},
+      {n:'Burj Al Diyafah Hotel', z:2, m:[10,15], c:'Koridor selatan; berjalan pulang lebih terasa.'},
+      {n:'M Hotel Makkah by Millennium', z:3, m:[12,18], c:'Lebih jauh; banyak jamaah mengandalkan shuttle.'},
+      {n:'voco Makkah by IHG', z:3, m:[14,22], c:'Koridor lebih jauh; shuttle sangat membantu.'}
+    ]
+  },
+  // Mahbas Al Jin: bukan jarak ke satu gerbang, tetapi rantai shuttle (infografis TDA, 8 September 2026).
+  // Kelompok (zones) = status verifikasi menurut infografis, bukan zona jarak.
+  mahbas: {
+    tipe: 'shuttle',
+    nama: 'Mahbas Al Jin',
+    gate: 'Masjidil Haram melalui King Abdulaziz Tunnel',
+    gateShort: 'Haram',
+    arah: 'alur shuttle via King Abdulaziz Tunnel',
+    zones: [
+      {nama: 'Drop-off terverifikasi (menurut TDA)', jarak: '', menit: ''},
+      {nama: 'Shuttle terverifikasi, drop-off belum final', jarak: '', menit: ''},
+      {nama: 'Operasional khusus / musiman', jarak: '', menit: ''}
+    ],
+    // Ilustrasi AI (bukan peta nyata). Gambar diperkecil 75%. Posisi titik hotel hanya skematis,
+    // tidak menunjuk bangunan tertentu pada gambar.
+    poster: {src: 'img/mahbas.jpg', w: 768, h: 1152, tipe: 'shuttle'},
+    hotels: [
+      {n:'Barakat Burhan Hotel', z:0, pos:[190,868], bus:'±3–4 menit',
+       shuttle:'Stasiun bersebelahan hotel', operasi:'24/7', dropoff:'Bab Al-Salam / Bab Al-Marwa', jalan:'Pendek',
+       c:'Via King Abdulaziz Tunnel; benchmark akses Mahbas.'},
+      {n:'Burhan Al-Huda Hotel', z:0, pos:[320,868], bus:'±3–4 menit',
+       shuttle:'Stasiun bersebelahan hotel', operasi:'24/7', dropoff:'Bab Al-Salam / Bab Al-Marwa', jalan:'Pendek',
+       c:'Sistem shuttle sama dengan Barakat Burhan.'},
+      {n:'Al Jawhara Tower Hotel', z:1, pos:[450,868], bus:'Perlu konfirmasi',
+       shuttle:'Shuttle hotel', operasi:'Gratis 24/7', dropoff:'Belum terverifikasi', jalan:'Perlu konfirmasi',
+       c:'Shuttle terverifikasi, tetapi titik turun spesifik belum terkonfirmasi.'},
+      {n:'Elaf Bakkah Hotel', z:2, pos:[580,868], bus:'±2–5 menit',
+       shuttle:'Shuttle hotel', operasi:'Reguler; perhatikan khusus Ramadan', dropoff:'Sisi Marwah', jalan:'Umumnya pendek',
+       c:'Arah drop-off cukup kuat ke sisi Marwah, layanan dapat berubah, terutama saat Ramadan.'}
     ]
   }
 };
@@ -517,8 +660,50 @@ function layoutArea(area){
   return {T: T, nZones: n, rMax: R0 + T * n, dots: dots, height: Math.ceil(CY + R0 + T * n + 24)};
 }
 
+// ===== TATA LETAK PETA ILUSTRASI (fungsi murni, diuji otomatis) =====
+var PIN_R = 26, PIN_MARG = 54;
+function posterLayout(area){
+  var P = area.poster, n = area.zones.length, z, i, j;
+  var rings = [];
+  for (z = 0; z <= n; z++) rings.push(P.r0 + P.t * z);
+  var byZone = [];
+  for (z = 0; z < n; z++) byZone.push([]);
+  for (i = 0; i < area.hotels.length; i++) byZone[area.hotels[i].z].push(i);
+  var dots = [];
+  for (z = 0; z < n; z++){
+    var list = byZone[z], m = list.length;
+    var inner = P.r0 + P.t * z;
+    var rHi = inner + P.t * (m <= 3 ? 0.5 : 0.72);
+    var maxA = Math.asin(Math.min(1, (P.w / 2 - PIN_MARG) / rHi)) * 180 / Math.PI;
+    var A = Math.min(60, maxA);
+    var step = m > 1 ? Math.min(16, (2 * A) / (m - 1)) : 0;
+    for (j = 0; j < m; j++){
+      var ang = (j - (m - 1) / 2) * step;
+      var frac = m <= 3 ? 0.5 : (j % 2 === 0 ? 0.28 : 0.72);
+      var r = inner + P.t * frac;
+      var idx = list[j], h = area.hotels[idx];
+      var x = P.cx + r * Math.sin(rad(ang));
+      var y = P.cy + r * Math.cos(rad(ang));
+      var fixed = false;
+      if (h.pos){ x = h.pos[0]; y = h.pos[1]; fixed = true; }
+      dots.push({idx: idx, no: idx + 1, zona: z, x: x, y: y, fixed: fixed});
+    }
+  }
+  dots.sort(function(a, b){ return a.idx - b.idx; });
+  return {rings: rings, dots: dots, gate: {x: P.cx, y: P.cy + P.r0 - P.gateUp}, w: P.w, h: P.h};
+}
+
+function shuttleLayout(area){
+  var dots = [], i;
+  for (i = 0; i < area.hotels.length; i++){
+    var h = area.hotels[i];
+    dots.push({idx: i, no: i + 1, zona: h.z, x: h.pos[0], y: h.pos[1], fixed: true});
+  }
+  return {dots: dots, w: area.poster.w, h: area.poster.h};
+}
+
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function waktuTeks(h){ return '±' + h.m[0] + '–' + h.m[1] + ' menit'; }
+function waktuTeks(h){ if(h.bus !== undefined){ return h.bus.charAt(0) === '±' ? 'bus ' + h.bus : 'bus: ' + h.bus.toLowerCase(); } return h.m[0] === h.m[1] ? '±' + h.m[0] + ' menit' : '±' + h.m[0] + '–' + h.m[1] + ' menit'; }
 //#CORE-END
 
 var currentArea = 'ajyad';
@@ -526,6 +711,8 @@ var currentHotelIdx = null;
 var selectedNo = null;
 var activeScreen = 'home';
 var petaFrom = 'home';
+var zoomIdx = 0;
+var ZOOMS = [1, 1.6, 2.4, 3.2];
 
 function pilihKawasan(kode){
   currentArea = kode;
@@ -553,6 +740,7 @@ function showScreen(id){
   }
   if(id === 'peta'){
     selectedNo = (currentHotelIdx !== null) ? currentHotelIdx + 1 : null;
+    zoomIdx = 0;
     document.getElementById('peta-judul-kawasan').textContent = 'Peta ' + areas[currentArea].nama;
     renderPeta();
   }
@@ -577,7 +765,7 @@ function renderHotelList(q){
     div.className = 'kartu';
     div.style.cursor = 'pointer';
     div.onclick = function(){ openHotel(idx); };
-    div.innerHTML = '<h3>' + esc(h.n) + '</h3><p class="sub">' + a.zones[h.z].nama + ' &middot; ' + waktuTeks(h) + ' ke ' + a.gateShort + '</p><span class="label-status status-estimasi">ESTIMASI</span>';
+    div.innerHTML = '<h3>' + esc(h.n) + '</h3><p class="sub">' + a.zones[h.z].nama + ' &middot; ' + waktuTeks(h) + (a.tipe === 'shuttle' ? '' : ' ke ' + a.gateShort) + '</p><span class="label-status status-estimasi">ESTIMASI</span>';
     wrap.appendChild(div);
   });
   if(ketemu === 0){
@@ -589,17 +777,36 @@ function filterHotel(){
   renderHotelList(document.getElementById('kotak-cari').value);
 }
 
+function kv(k, v){ return '<div class="kv"><div class="k">' + k + '</div><div class="v">' + esc(v) + '</div></div>'; }
+
 function openHotel(idx){
   var a = areas[currentArea];
   var h = a.hotels[idx];
+  var shuttle = (a.tipe === 'shuttle');
   currentHotelIdx = idx;
   document.getElementById('detail-nama').textContent = h.n;
-  document.getElementById('detail-kawasan').textContent = 'Kawasan ' + a.nama + ' · ' + a.zones[h.z].nama + ' (kira-kira ' + a.zones[h.z].jarak + ')';
+  document.getElementById('detail-kawasan').textContent = shuttle
+    ? 'Kawasan ' + a.nama + ' · ' + a.zones[h.z].nama
+    : 'Kawasan ' + a.nama + ' · ' + a.zones[h.z].nama + ' (kira-kira ' + a.zones[h.z].jarak + ')';
+  document.getElementById('detail-akses').style.display = shuttle ? 'none' : '';
+  var ds = document.getElementById('detail-shuttle');
+  var ks = document.getElementById('keharam-shuttle');
+  var rantai = shuttle ? (
+      kv('Akses shuttle', h.shuttle) + kv('Operasi / frekuensi', h.operasi) + kv('Waktu bus', h.bus) +
+      kv('Titik drop-off', h.dropoff) + kv('Sisa jalan kaki', h.jalan)) : '';
+  ds.style.display = shuttle ? 'block' : 'none';
+  ds.innerHTML = rantai;
   document.getElementById('detail-gate').textContent = a.gate;
-  document.getElementById('detail-waktu').textContent = waktuTeks(h);
+  document.getElementById('detail-waktu').textContent = shuttle ? '' : waktuTeks(h);
   document.getElementById('detail-catatan').textContent = h.c;
   document.getElementById('keharam-gate').textContent = a.gate;
-  document.getElementById('pulang-gate').textContent = 'Dari ' + a.gateShort + ', arah kembali';
+  document.getElementById('keharam-umum').style.display = shuttle ? 'none' : '';
+  ks.style.display = shuttle ? 'block' : 'none';
+  ks.innerHTML = shuttle ? '<div class="rantai"><b>Alur menurut infografis TDA</b>Hotel &rarr; shuttle &rarr; waktu bus &rarr; titik drop-off &rarr; sisa jalan kaki &rarr; catatan operasional.</div><div class="kartu">' + rantai + '</div><div class="peringatan">Waktu bus hanya perjalanan shuttle setelah kendaraan bergerak. Waktu total ke Haram bergantung pada waktu tunggu shuttle, kepadatan lalu lintas, kondisi terowongan, titik naik dan turun, serta arus jamaah setelah turun.</div>' : '';
+  document.getElementById('pulang-gate').textContent = shuttle ? 'Kembali dari titik drop-off' : 'Dari ' + a.gateShort + ', arah kembali';
+  document.getElementById('pulang-teks').textContent = shuttle
+    ? 'Informasi titik naik, jadwal, dan titik turun untuk perjalanan pulang belum tersedia di data ini. Tanyakan ke petugas hotel Anda, dan gunakan tombol "Saya tersesat" bila bingung.'
+    : 'Setelah keluar dari gate acuan, cari kembali arah kawasan hotel Anda. Ingat ciri hotel Anda (warna gedung, nama depan) untuk memudahkan pencarian saat ramai.';
   showScreen('detail');
 }
 
@@ -644,10 +851,211 @@ function buildRadialSvg(area, selNo){
   return s;
 }
 
+function halo(x, y, txt, size, anchor, fill){
+  var a = ' x="' + x + '" y="' + y + '" text-anchor="' + (anchor || 'middle') + '" dominant-baseline="central" font-size="' + size + '" font-weight="700"';
+  return '<text' + a + ' fill="#ffffff" stroke="#ffffff" stroke-width="' + (size * 0.35).toFixed(1) + '" stroke-linejoin="round">' + txt + '</text>' +
+         '<text' + a + ' fill="' + (fill || '#1a1a18') + '">' + txt + '</text>';
+}
+
+function andaLabelPos(d, L, area){
+  var P = area.poster;
+  var ly = d.y - 78, lx = Math.max(110, Math.min(P.w - 110, d.x));
+  if(d.y - L.gate.y < 330){ ly = d.y + 78; }
+  for(var q = 0; q < area.zones.length; q++){
+    if(area.zones[q].batas && Math.abs(ly - (P.cy + L.rings[q + 1])) < 46 && Math.abs(lx - P.cx) < 160){ ly = d.y + 78; }
+  }
+  if(ly < 40) ly = d.y + 78;
+  return {x: lx, y: ly};
+}
+
+function buildPosterHtml(area, selNo){
+  var P = area.poster, L = posterLayout(area), i, k;
+  var s = '<div style="position:relative;line-height:0;">';
+  s += '<img src="' + P.src + '" alt="Ilustrasi kawasan ' + esc(area.nama) + '" draggable="false" style="display:block;width:100%;height:auto;">';
+  s += '<svg viewBox="0 0 ' + P.w + ' ' + P.h + '" style="position:absolute;left:0;top:0;width:100%;height:100%;" role="img" aria-label="Peta ilustrasi kawasan ' + esc(area.nama) + '">';
+  // cincin zona
+  for(k = 0; k < L.rings.length; k++){
+    var col = ZONE_COLORS[Math.min(k, area.zones.length - 1)];
+    s += '<circle cx="' + P.cx + '" cy="' + P.cy + '" r="' + L.rings[k] + '" fill="none" stroke="#ffffff" stroke-width="12" opacity="0.85"/>';
+    s += '<circle cx="' + P.cx + '" cy="' + P.cy + '" r="' + L.rings[k] + '" fill="none" stroke="' + col + '" stroke-width="6" stroke-dasharray="26 14"/>';
+  }
+  // Masjidil Haram + landmark + gate
+  s += halo(P.cx, Math.max(P.cy + 50, Math.min(P.cy + 120, L.gate.y - 56)), 'MASJIDIL HARAM', 30);
+  if(P.menara){ s += halo(P.menara[0], P.menara[1], 'Menara Jam', 24, 'middle', '#0f4d3c'); }
+  s += '<rect x="' + (L.gate.x - 62) + '" y="' + (L.gate.y - 22) + '" width="124" height="44" rx="22" fill="#0f4d3c" stroke="#ffffff" stroke-width="4"/>';
+  s += '<text x="' + L.gate.x + '" y="' + L.gate.y + '" text-anchor="middle" dominant-baseline="central" font-size="28" font-weight="700" fill="#ffffff">' + area.gateShort + '</text>';
+  // panah dari hotel terpilih ke gate (garis lurus, bukan rute)
+  var sel = null;
+  for(i = 0; i < L.dots.length; i++){ if(L.dots[i].no === selNo) sel = L.dots[i]; }
+  if(sel){
+    var dx = L.gate.x - sel.x, dy = L.gate.y - sel.y, len = Math.sqrt(dx * dx + dy * dy);
+    if(len > 140){
+      var ux = dx / len, uy = dy / len;
+      var x1 = sel.x + ux * 44, y1 = sel.y + uy * 44;
+      var x2 = L.gate.x - ux * 70, y2 = L.gate.y - uy * 70;
+      var px = -uy, py = ux;
+      s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>';
+      s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#1a1a18" stroke-width="8" stroke-dasharray="22 14" stroke-linecap="round"/>';
+      var hx = x2 + ux * 34, hy = y2 + uy * 34;
+      var pts = hx.toFixed(1) + ',' + hy.toFixed(1) + ' ' + (x2 + px * 22).toFixed(1) + ',' + (y2 + py * 22).toFixed(1) + ' ' + (x2 - px * 22).toFixed(1) + ',' + (y2 - py * 22).toFixed(1);
+      s += '<polygon points="' + pts + '" fill="#1a1a18" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>';
+      var ap = andaLabelPos(sel, L, area), fr = [0.5, 0.35, 0.65, 0.25, 0.75], pick = null, f, c, cxm, cym, bad, m2, q2;
+      for(f = 0; f < fr.length && !pick; f++){
+        cxm = x1 + (x2 - x1) * fr[f]; cym = y1 + (y2 - y1) * fr[f]; bad = false;
+        for(m2 = 0; m2 < L.dots.length; m2++){
+          if(Math.abs(L.dots[m2].x - cxm) < 96 + 44 && Math.abs(L.dots[m2].y - cym) < 19 + 44) bad = true;
+        }
+        if(Math.abs(ap.x - cxm) < 96 + 104 && Math.abs(ap.y - cym) < 19 + 22) bad = true;
+        for(q2 = 0; q2 < area.zones.length; q2++){
+          if(area.zones[q2].batas && Math.abs(P.cx - cxm) < 96 + 52 && Math.abs(P.cy + L.rings[q2 + 1] - cym) < 19 + 17) bad = true;
+        }
+        if(Math.abs(cym - L.gate.y) < 19 + 22 + 10 && Math.abs(cxm - L.gate.x) < 96 + 62) bad = true;
+        if(!bad) pick = {x: cxm, y: cym};
+      }
+      if(pick){
+        s += '<rect x="' + (pick.x - 96).toFixed(1) + '" y="' + (pick.y - 19).toFixed(1) + '" width="192" height="38" rx="19" fill="#ffffff" stroke="#1a1a18" stroke-width="3"/>';
+        s += '<text x="' + pick.x.toFixed(1) + '" y="' + pick.y.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="700" fill="#1a1a18">Arah ke ' + esc(area.gateShort) + '</text>';
+      }
+    }
+  }
+  // label batas jarak di sumbu tengah
+  for(k = 0; k < area.zones.length; k++){
+    if(!area.zones[k].batas) continue;
+    var ty = P.cy + L.rings[k + 1];
+    s += '<rect x="' + (P.cx - 52) + '" y="' + (ty - 17) + '" width="104" height="34" rx="17" fill="#ffffff" stroke="' + ZONE_COLORS[k] + '" stroke-width="4"/>';
+    s += '<text x="' + P.cx + '" y="' + ty + '" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="700" fill="#1a1a18">' + area.zones[k].batas + '</text>';
+  }
+  // titik hotel (yang terpilih digambar terakhir)
+  var ordered = L.dots.slice().sort(function(a, b){ return (a.no === selNo ? 1 : 0) - (b.no === selNo ? 1 : 0); });
+  ordered.forEach(function(d){
+    var isSel = (d.no === selNo);
+    var nm = area.hotels[d.idx].n;
+    var x = d.x.toFixed(1), y = d.y.toFixed(1);
+    s += '<g data-no="' + d.no + '" role="button" aria-label="Hotel nomor ' + d.no + ', ' + esc(nm) + '" style="cursor:pointer">';
+    s += '<circle cx="' + x + '" cy="' + y + '" r="40" fill="transparent"/>';
+    if(isSel){
+      s += '<circle cx="' + x + '" cy="' + y + '" r="46" fill="#ffffff" opacity="0.9"/>';
+      s += '<circle cx="' + x + '" cy="' + y + '" r="38" fill="#ffd54a" stroke="#1a1a18" stroke-width="7"/>';
+      s += '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="36" font-weight="700" fill="#1a1a18">' + d.no + '</text>';
+      var ap2 = andaLabelPos(d, L, area), lx = ap2.x, ly = ap2.y;
+      s += '<rect x="' + (lx - 104) + '" y="' + (ly - 22) + '" width="208" height="44" rx="22" fill="#1a1a18" stroke="#ffffff" stroke-width="4"/>';
+      s += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="700" fill="#ffd54a">ANDA DI SINI</text>';
+    } else {
+      s += '<circle cx="' + x + '" cy="' + y + '" r="' + PIN_R + '" fill="#ffffff" stroke="' + ZONE_COLORS[d.zona] + '" stroke-width="7"/>';
+      s += '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="28" font-weight="700" fill="#1a1a18">' + d.no + '</text>';
+    }
+    s += '</g>';
+  });
+  // keterangan permanen
+  s += '<rect x="14" y="' + (P.h - 58) + '" width="330" height="44" rx="10" fill="#1a1a18" opacity="0.82"/>';
+  s += '<text x="26" y="' + (P.h - 36) + '" dominant-baseline="central" font-size="22" font-weight="700" fill="#ffffff">ILUSTRASI, BUKAN PETA</text>';
+  var bw = Math.max(316, Math.round(('Kawasan: ' + area.arah).length * 12.4 + 36));
+  s += '<rect x="' + (P.w - bw - 14) + '" y="14" width="' + bw + '" height="44" rx="10" fill="#1a1a18" opacity="0.82"/>';
+  s += '<text x="' + (P.w - 14 - bw / 2) + '" y="36" text-anchor="middle" dominant-baseline="central" font-size="21" font-weight="700" fill="#ffffff">Kawasan: ' + esc(area.arah) + '</text>';
+  s += '</svg></div>';
+  return s;
+}
+
+function buildShuttleHtml(area, selNo){
+  var P = area.poster, L = shuttleLayout(area), i;
+  var cx = 388;
+  var s = '<div style="position:relative;line-height:0;">';
+  s += '<img src="' + P.src + '" alt="Ilustrasi kawasan ' + esc(area.nama) + '" draggable="false" style="display:block;width:100%;height:auto;">';
+  s += '<svg viewBox="0 0 ' + P.w + ' ' + P.h + '" style="position:absolute;left:0;top:0;width:100%;height:100%;" role="img" aria-label="Peta ilustrasi alur shuttle ' + esc(area.nama) + '">';
+  // garis hotel -> stasiun
+  for(i = 0; i < L.dots.length; i++){
+    var d0 = L.dots[i];
+    s += '<line x1="' + d0.x + '" y1="' + (d0.y - 30) + '" x2="' + cx + '" y2="772" stroke="#ffffff" stroke-width="12" opacity="0.85" stroke-linecap="round"/>';
+    s += '<line x1="' + d0.x + '" y1="' + (d0.y - 30) + '" x2="' + cx + '" y2="772" stroke="' + STATUS_COLORS[d0.zona] + '" stroke-width="5" stroke-dasharray="14 10" stroke-linecap="round"/>';
+  }
+  // jalur shuttle stasiun -> Haram
+  s += '<line x1="' + cx + '" y1="700" x2="' + cx + '" y2="335" stroke="#ffffff" stroke-width="26" stroke-linecap="round" opacity="0.9"/>';
+  s += '<line x1="' + cx + '" y1="700" x2="' + cx + '" y2="335" stroke="#1d4ed8" stroke-width="12" stroke-linecap="round"/>';
+  var ay = [590, 380];
+  for(i = 0; i < ay.length; i++){
+    s += '<polygon points="' + cx + ',' + (ay[i] - 28) + ' ' + (cx - 24) + ',' + (ay[i] + 14) + ' ' + (cx + 24) + ',' + (ay[i] + 14) + '" fill="#1d4ed8" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>';
+  }
+  // label
+  s += halo(cx, 66, 'MASJIDIL HARAM', 30);
+  function pil(x, y, w, txt, fill, tc){
+    return '<rect x="' + (x - w / 2) + '" y="' + (y - 22) + '" width="' + w + '" height="44" rx="22" fill="' + fill + '" stroke="#ffffff" stroke-width="4"/>' +
+           '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="' + tc + '">' + txt + '</text>';
+  }
+  s += pil(252, 300, 210, 'Bab Al-Salam', '#0f4d3c', '#ffffff');
+  s += pil(524, 300, 210, 'Bab Al-Marwa', '#0f4d3c', '#ffffff');
+  s += pil(cx, 470, 340, 'King Abdulaziz Tunnel', '#1d4ed8', '#ffffff');
+  s += pil(cx, 745, 250, 'Stasiun shuttle', '#1d4ed8', '#ffffff');
+  s += halo(cx, 1085, 'MAHBAS AL JIN', 30);
+  // titik hotel
+  var ordered = L.dots.slice().sort(function(a, b){ return (a.no === selNo ? 1 : 0) - (b.no === selNo ? 1 : 0); });
+  ordered.forEach(function(d){
+    var isSel = (d.no === selNo);
+    var x = d.x.toFixed(1), y = d.y.toFixed(1);
+    s += '<g data-no="' + d.no + '" role="button" aria-label="Hotel nomor ' + d.no + ', ' + esc(area.hotels[d.idx].n) + '" style="cursor:pointer">';
+    s += '<circle cx="' + x + '" cy="' + y + '" r="40" fill="transparent"/>';
+    if(isSel){
+      s += '<circle cx="' + x + '" cy="' + y + '" r="46" fill="#ffffff" opacity="0.9"/>';
+      s += '<circle cx="' + x + '" cy="' + y + '" r="38" fill="#ffd54a" stroke="#1a1a18" stroke-width="7"/>';
+      s += '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="36" font-weight="700" fill="#1a1a18">' + d.no + '</text>';
+      var lx = Math.max(110, Math.min(P.w - 110, d.x)), ly = d.y + 82;
+      s += '<rect x="' + (lx - 104) + '" y="' + (ly - 22) + '" width="208" height="44" rx="22" fill="#1a1a18" stroke="#ffffff" stroke-width="4"/>';
+      s += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="700" fill="#ffd54a">ANDA DI SINI</text>';
+    } else {
+      s += '<circle cx="' + x + '" cy="' + y + '" r="' + PIN_R + '" fill="#ffffff" stroke="' + STATUS_COLORS[d.zona] + '" stroke-width="7"/>';
+      s += '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="central" font-size="28" font-weight="700" fill="#1a1a18">' + d.no + '</text>';
+    }
+    s += '</g>';
+  });
+  s += '<rect x="14" y="' + (P.h - 58) + '" width="330" height="44" rx="10" fill="#1a1a18" opacity="0.82"/>';
+  s += '<text x="26" y="' + (P.h - 36) + '" dominant-baseline="central" font-size="22" font-weight="700" fill="#ffffff">ILUSTRASI, BUKAN PETA</text>';
+  s += '</svg></div>';
+  return s;
+}
+
+function gambarPeta(){
+  var a = areas[currentArea];
+  var wrap = document.getElementById('peta-svg-wrap');
+  var bar = document.getElementById('zoom-bar');
+  if(a.poster){
+    wrap.innerHTML = (a.tipe === 'shuttle') ? buildShuttleHtml(a, selectedNo) : buildPosterHtml(a, selectedNo);
+    wrap.style.width = (ZOOMS[zoomIdx] * 100) + '%';
+    bar.style.display = 'flex';
+  } else {
+    wrap.innerHTML = buildRadialSvg(a, selectedNo);
+    wrap.style.width = '100%';
+    bar.style.display = 'none';
+  }
+}
+
+function ubahZoom(arah){
+  if(arah === 0) zoomIdx = 0;
+  else zoomIdx = Math.max(0, Math.min(ZOOMS.length - 1, zoomIdx + arah));
+  gambarPeta();
+  var a = areas[currentArea];
+  var sc = document.getElementById('peta-scroll');
+  var wrap = document.getElementById('peta-svg-wrap');
+  if(!a.poster) return;
+  var fokus = null;
+  if(selectedNo !== null){
+    var L = (a.tipe === 'shuttle') ? shuttleLayout(a) : posterLayout(a);
+    for(var i = 0; i < L.dots.length; i++){ if(L.dots[i].no === selectedNo) fokus = L.dots[i]; }
+  }
+  var fx = fokus ? fokus.x / a.poster.w : 0.5;
+  var fy = fokus ? fokus.y / a.poster.h : 0.3;
+  sc.scrollLeft = fx * wrap.offsetWidth - sc.clientWidth / 2;
+  sc.scrollTop = fy * wrap.offsetHeight - sc.clientHeight / 2;
+}
+
 function renderPeta(){
   var a = areas[currentArea];
   var wrap = document.getElementById('peta-svg-wrap');
-  wrap.innerHTML = buildRadialSvg(a, selectedNo);
+  gambarPeta();
+  var shut = (a.tipe === 'shuttle');
+  document.getElementById('peta-peringatan').textContent = shut
+    ? 'Gambar ini ilustrasi buatan AI, bukan foto udara atau peta resmi. Letak terowongan, stasiun, pintu, dan hotel pada gambar tidak dijamin akurat, dan titik hotel tidak menunjuk bangunan tertentu. Urutan alur mengikuti infografis TDA. Waktu bus bukan waktu total ke Haram. Status verifikasi adalah klaim infografis TDA dan belum Anda atau saya cek di lapangan.'
+    : a.poster
+    ? 'Gambar ini ilustrasi buatan AI, bukan foto udara atau peta resmi. Bentuk bangunan dan jalan tidak nyata. Cincin, nomor, dan panah hanya skematis: garis ke gate adalah garis lurus, bukan rute jalan kaki, dan posisi titik di dalam satu cincin tidak menunjukkan letak hotel yang sebenarnya. Data hotel masih ESTIMASI.'
+    : 'Peta ini skematis, bukan peta presisi. Jarak dan arah disederhanakan, dan kipas digambar ke bawah agar muat di layar. Arah sebenarnya tertulis di pojok kanan atas peta. Posisi titik di dalam satu cincin tidak menunjukkan letak hotel yang sebenarnya.';
   wrap.onclick = function(e){
     var el = e.target;
     while(el && el !== wrap){
@@ -659,15 +1067,18 @@ function renderPeta(){
     }
   };
   var leg = document.getElementById('peta-legenda');
-  var html = '';
+  var html = shut ? '<div class="rantai"><b>Alur menurut infografis TDA</b>Hotel &rarr; shuttle &rarr; terowongan &rarr; drop-off Bab Al-Salam / Bab Al-Marwa &rarr; sisa jalan kaki.</div>' : '';
+  var zc = shut ? STATUS_COLORS : ZONE_COLORS;
   a.zones.forEach(function(zn, zi){
-    html += '<div class="zona-judul"><span class="swatch" style="background:' + ZONE_TINTS[zi] + '"></span><div><b>' + zn.nama + '</b><span class="info">' + zn.jarak + ' &middot; ' + zn.menit + '</span></div></div>';
+    var swStyle = a.poster ? 'background:#fff;border:5px solid ' + zc[zi] : 'background:' + ZONE_TINTS[zi];
+    html += '<div class="zona-judul"><span class="swatch" style="' + swStyle + '"></span><div><b>' + zn.nama + '</b><span class="info">' + (zn.jarak ? zn.jarak + ' &middot; ' + zn.menit : '') + '</span></div></div>';
     a.hotels.forEach(function(h, idx){
       if(h.z !== zi) return;
       var no = idx + 1;
       var cls = 'baris-hotel' + (no === selectedNo ? ' terpilih' : '');
       var anda = (idx === currentHotelIdx) ? '<small>Hotel yang Anda buka</small>' : '';
-      html += '<button class="' + cls + '" id="baris-' + no + '" onclick="openHotel(' + idx + ')"><span class="no">' + no + '</span><span class="nm">' + esc(h.n) + anda + '</span><span class="wk">' + waktuTeks(h) + '</span></button>';
+      var noStyle = a.poster ? ' style="border-color:' + zc[zi] + '"' : '';
+      html += '<button class="' + cls + '" id="baris-' + no + '" onclick="openHotel(' + idx + ')"><span class="no"' + noStyle + '>' + no + '</span><span class="nm">' + esc(h.n) + anda + '</span><span class="wk">' + waktuTeks(h) + '</span></button>';
     });
   });
   leg.innerHTML = html;
@@ -680,7 +1091,7 @@ function renderPeta(){
 function tandaiNomor(no){
   selectedNo = no;
   var a = areas[currentArea];
-  document.getElementById('peta-svg-wrap').innerHTML = buildRadialSvg(a, selectedNo);
+  gambarPeta();
   var rows = document.querySelectorAll('.baris-hotel');
   for(var i = 0; i < rows.length; i++){ rows[i].classList.remove('terpilih'); }
   var row = document.getElementById('baris-' + no);
